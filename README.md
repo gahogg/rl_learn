@@ -1,5 +1,5 @@
 # rl_learn
-A package to accompany the book "Reinforcement Learning: A Python Introduction".
+rl-learn is a Python package that teaches fundamental reinforcement learning techniques in Python. It closely follows Sutton and Barto’s famous “Reinforcement Learning: An Introduction”.
 
 It's on PyPi! Just pip install rl-learn and it should be good to go!
 
