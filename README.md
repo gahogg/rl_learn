@@ -7,7 +7,7 @@ Link to the PyPi page: https://pypi.org/project/rl-learn/
 
 2. After activating the virtual environment, "pip install rl-learn" should grab the updated package from PyPi.
 
-3. View (and optionally run) the example code shown in the readme. It should produce a pdf showing the performance of some bandit agents.
+3. View (and optionally run) the example code shown below. It should produce a pdf showing the performance of some bandit agents.
 
 4. Browse through the code in the GitHub browser or example code below to see how to get different (already implemented agents) to interact with other environments. Note that when the comments specify "... defines an interface" that these are not concrete implementations - they instead describe an interface that must be implemented. Also note that Contextual agents/bandits can only interact with their contextual counterparts - the others should be free to "mix and match", though.
 
