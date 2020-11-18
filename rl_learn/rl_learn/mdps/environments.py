@@ -8,8 +8,7 @@ class MDP:
 
 		Parameters
 		----------
-
-        dynamics : List[List[List[List[Int]]]]
+        dynamics : List[List[List[List[ 0 <= Float <= 1]]]]
             The joint reward-state distribution for each possible current state s_t and action taken a_t, i.e p(S_{t+1} = s', R_{t+1} = r | S_t = s, A_t = a).
             dynamics has the shape (S, A, S, R), where A is the number of actions, S is the number of states, and R is the number of rewards.
             So it can be thought of as a matrix with S rows and A columns corresponding to the current state s and action taken a.
@@ -42,7 +41,7 @@ class MDP:
             The current state, S_t = s
 
 		a : Int in {0, ..., A-1}
-		  The action taken, A_t = a
+		    The action taken, A_t = a
 
 		Returns
 		-------
@@ -73,6 +72,27 @@ class MDP:
     
     @staticmethod
     def MDP_from_transitions_and_reward_sas_triples(state_transitions, reward_sas_triples, rewards, name="MDP"):
+        """
+        Returns an MDP constructed with the state_transitions p(S_{t+1} = s | A_t = a, S_t = s), 
+        the reward_state_action_next_state triples p(R_{t+1} = r | S_{t+1} = s', A_t = a, S_t = s), and
+        the rewards vector of length R whose ith element is the value of reward i.
+
+        Parameters
+		----------
+        state_transitions : List[List[List[ 0 <= Float <= 1]]]
+            The state transitions p(S_{t+1} = s | A_t = a, S_t = s), which is a list of shape (S, A, S)
+
+		reward_sas_triples : List[List[List[List[0 <= Float <= 1]]]]
+		    The reward state_action_next_state triples p(R_{t+1} = r | S_{t+1} = s', A_t = a, S_t = s)
+        
+        rewards : List[Float]
+            The rewards vector of length R whose ith element is the value of reward i.
+
+		Returns
+		-------
+		MDP
+            Returns a new MDP object.
+        """
         state_transitions = np.array(state_transitions)
         reward_sas_triples = np.array(reward_sas_triples)
         rewards = np.array(rewards)
