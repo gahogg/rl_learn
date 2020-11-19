@@ -1,5 +1,6 @@
 import tkinter as tk
 from statistics import median
+import numpy as np
 
 
 def draw_initial(window):
@@ -62,7 +63,8 @@ def draw_state_transitions_selection():
     state_transitions_frame.pack()
     S = inputs["S"]
     A = inputs["A"]
-    
+    transition_entries = np.zeros(shape=(S, A, S), dtype=object)
+
     for s in range(S):
         state_frame = tk.Frame(master=state_transitions_frame, borderwidth=2)
         state_frame.pack()
@@ -94,7 +96,39 @@ def draw_state_transitions_selection():
                     elem_frame.grid(row=i, column=j)
                     default_value = tk.StringVar(elem_frame, value='0')
                     entry = tk.Entry(elem_frame, textvariable=default_value)
+                    transition_entries[s,i-1,j-1] = entry
                     entry.pack()
+    
+    submit_btn = tk.Button(master=state_transitions_frame, text="Set Transition Probabilities", command= lambda: get_transitions(transition_entries))
+    submit_btn.pack()
+
+def get_transitions(transition_entries):
+    S = inputs['S']
+    A = inputs['A']
+    get = np.vectorize(lambda entry: entry.get())
+    transitions = get(transition_entries).astype(np.float)
+    inputs["Transitions"] = transitions
+    print(transitions)
+    draw_rewards_selection()
+
+def draw_rewards_selection():
+    S = inputs['S']
+    A = inputs['A']
+    rewards_frame = tk.Frame(master=main_frame)
+    rewards_frame.pack()
+    rewards_lbl = tk.Label(master=rewards_frame, text="Possible reward values, comma-separated:")
+    rewards_lbl.grid(row=0, column=0)
+    rewards_entry = tk.Entry(master=rewards_frame)
+    rewards_entry.grid(row=0, column=1)
+    rewards_button = tk.Button(master=rewards_frame, text="Set rewards", command= lambda: get_rewards(rewards_entry))
+    rewards_button.grid(row=0, column=2)
+
+def get_rewards(rewards_entry):
+    rewards = [float(reward) for reward in rewards_entry.get().split(',')]
+    rewards = sorted(rewards)
+    inputs["Rewards"] = rewards
+    inputs["R"] = len(rewards)
+    print(rewards)
 
 window = tk.Tk()
 draw_initial(window)

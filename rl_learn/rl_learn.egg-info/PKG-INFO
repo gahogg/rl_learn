@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: rl-learn
+Version: 1.0.2
+Summary: A package to accompany the book "Reinforcement Learning: A Python Introduction"
+Home-page: https://github.com/gahogg/rl_learn.git
+Author: Gregory Hogg
+Author-email: gahogg@uwaterloo.ca
+License: MIT
+Description: rl-learn is a Python package that teaches fundamental reinforcement learning techniques in Python. It closely follows Sutton and Barto's famous "Reinforcement Learning: An Introduction".
+        Check out the GitHub for example code: https://github.com/gahogg/rl_learn
+Platform: UNKNOWN
