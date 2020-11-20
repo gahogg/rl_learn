@@ -5,7 +5,11 @@ state_transitions = [[[.25, .75],[.5, .5]], [[.4, .6],[.2, .8]]]
 reward_sas_triples = [[[[.2, .8, 0],[.5, 0, .5]], [[0, .75, .25],[0, .5, .5]]], [[[.5, 0, .5],[0, .5, .5]], [[.5, 0, .5],[0, .75, .25]]]]
 rewards = [-1, 0, 1]
 
-env = MDP.MDP_from_transitions_and_reward_sas_triples(state_transitions, reward_sas_triples, rewards)
+env_from_scratch = MDP.MDP_from_transitions_and_reward_sas_triples(state_transitions, reward_sas_triples, rewards)
+
+env_from_gui = MDP.MDP_from_gui()
+
+env = env_from_gui
 
 s = 0
 for i in range(100):

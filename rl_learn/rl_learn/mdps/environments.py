@@ -1,4 +1,6 @@
 import numpy as np
+from rl_learn.mdps.guis import MDPConstructionGUI
+
 
 class MDP:
     
@@ -112,5 +114,15 @@ class MDP:
 
         mdp = MDP(dynamics, rewards, name)
 
+        return mdp
+    
+    @staticmethod
+    def MDP_from_gui(name="MDP"):
+        gui = MDPConstructionGUI()
+        inputs = gui.inputs
+        state_transitions = inputs["Transitions"]
+        rewards = inputs["Rewards"]
+        reward_sas_triples = inputs["RewardTriples"]
+        mdp = MDP.MDP_from_transitions_and_reward_sas_triples(state_transitions, reward_sas_triples, rewards, name=name)
         return mdp
 
