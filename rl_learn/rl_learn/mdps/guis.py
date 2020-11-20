@@ -1,7 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 import numpy as np
+from ctypes import windll
 
+# Fonts
+TIMES12BOLD = ("Times New Roman", 12, "bold")
+TIMES14BOLD = ("Times New Roman", 14, "bold")
+TIMES16BOLD = ("Times New Roman", 16, "bold")
+
+DEFAULT_BTN = ("Times New Roman", 11)
 
 class MDPConstructionGUI:
     """
@@ -20,6 +27,7 @@ class MDPConstructionGUI:
     """
     
     def __init__(self):
+        windll.shcore.SetProcessDpiAwareness(1)
         self.inputs = {"S" : None, "A" : None, "R" : None, "Transitions" : None, "Rewards" : None, "RewardTriples" : None}
         self._window = tk.Tk()
         self._draw_initial(self._window)
@@ -37,12 +45,13 @@ class MDPConstructionGUI:
     def _draw_S_selection(self):
         S_selection_frame = tk.Frame(master=self._main_frame, pady=10)
         S_selection_frame.pack()
-        S_lbl = tk.Label(S_selection_frame, text="How many states?")
-        S_lbl.grid(row=0, column=0)
+        S_lbl = tk.Label(S_selection_frame, text="How many states?", font=TIMES12BOLD)
+        S_lbl.grid(row=0, column=0, padx=5)
         S_entry = tk.Entry(S_selection_frame)
-        S_entry.grid(row=0, column=1)
-        S_button = tk.Button(S_selection_frame, text="Set Number of States", command= lambda: self._get_S(S_entry, S_selection_frame))
-        S_button.grid(row=0, column=2)
+        S_entry.grid(row=0, column=1, padx=5)
+        S_button = tk.Button(S_selection_frame, text="Confirm", 
+        command= lambda: self._get_S(S_entry, S_selection_frame), font=DEFAULT_BTN)
+        S_button.grid(row=0, column=2, padx=5)
     
     def _get_S(self, S_entry, S_frame):
         S = S_entry.get()
@@ -60,12 +69,13 @@ class MDPConstructionGUI:
     def _draw_A_selection(self):
         A_selection_frame = tk.Frame(master=self._main_frame, pady=10)
         A_selection_frame.pack()
-        A_lbl = tk.Label(A_selection_frame, text="How many actions?")
-        A_lbl.grid(row=0, column=0)
+        A_lbl = tk.Label(A_selection_frame, text="How many actions?", font=TIMES12BOLD)
+        A_lbl.grid(row=0, column=0, padx=5)
         A_entry = tk.Entry(A_selection_frame)
-        A_entry.grid(row=0, column=1)
-        A_button = tk.Button(A_selection_frame, text="Set Number of Actions", command= lambda: self._get_A(A_entry, A_selection_frame))
-        A_button.grid(row=0, column=2)
+        A_entry.grid(row=0, column=1, padx=5)
+        A_button = tk.Button(A_selection_frame, text="Confirm", 
+        command= lambda: self._get_A(A_entry, A_selection_frame), font=DEFAULT_BTN)
+        A_button.grid(row=0, column=2, padx=5)
     
     def _get_A(self, A_entry, A_frame):
         A = A_entry.get()
@@ -81,35 +91,37 @@ class MDPConstructionGUI:
         A_frame.pack_forget()
     
     def _draw_state_transitions_selection(self):
-        transitions_block_frame = tk.Frame(master=self._main_frame)
+        transitions_block_frame = tk.Frame(master=self._main_frame, pady=10)
         transitions_block_frame.pack()
-        transitions_lbl = tk.Label(transitions_block_frame, text="We now require the state transitions probability distribution, p(S_{t+1} = s | A_t = a, S_t = s):")
+        
+        transitions_lbl = tk.Label(transitions_block_frame, 
+        text="The P(s' | a, s) function:", font=TIMES16BOLD, pady=10)
         transitions_lbl.pack()
 
-        state_transitions_frame = tk.Frame(master=transitions_block_frame, borderwidth=3)
-        state_transitions_frame.pack()
+        state_transitions_frame = tk.Frame(master=transitions_block_frame)
+        state_transitions_frame.pack(pady=10)
         S = self.inputs["S"]
         A = self.inputs["A"]
         transition_entries = np.zeros(shape=(S, A, S), dtype=object)
 
         for s in range(S):
-            state_frame = tk.Frame(master=state_transitions_frame, borderwidth=2)
+            state_frame = tk.Frame(master=state_transitions_frame, pady=10, bd=3, relief=tk.GROOVE)
             state_frame.pack()
             
-            current_state_label = tk.Label(master=state_frame, text="State Transitions for the Current State " + str(s)  + ":")
+            current_state_label = tk.Label(master=state_frame, text="s = " + str(s), font=TIMES14BOLD)
             current_state_label.pack()
             
-            next_state_label = tk.Label(master=state_frame, text="Next State")
+            next_state_label = tk.Label(master=state_frame, text="s'", font=TIMES12BOLD)
             next_state_label.pack()
             
             matrix_area_frame = tk.Frame(master=state_frame)
             matrix_area_frame.pack(side=tk.LEFT)
             
-            action_label = tk.Label(master=matrix_area_frame, text="Action")
-            action_label.grid(row=0, column=0)
+            action_label = tk.Label(master=matrix_area_frame, text="a", font=TIMES12BOLD)
+            action_label.grid(row=0, column=0, padx=5)
 
             actual_matrix = tk.Frame(master=matrix_area_frame)
-            actual_matrix.grid(row=0, column=1)
+            actual_matrix.grid(row=0, column=1, padx=(0, 10))
 
             for i in range(A+1):
                 for j in range(S+1):
@@ -122,12 +134,15 @@ class MDPConstructionGUI:
                         elem_frame = tk.Frame(master=actual_matrix, relief=tk.RAISED, borderwidth=1)
                         elem_frame.grid(row=i, column=j)
                         default_value = tk.StringVar(elem_frame, value='0')
-                        entry = tk.Entry(elem_frame, textvariable=default_value)
+                        entry = tk.Entry(elem_frame, textvariable=default_value, width=4)
                         transition_entries[s,i-1,j-1] = entry
                         entry.pack()
         
-        submit_btn = tk.Button(master=state_transitions_frame, text="Set Transition Probabilities", command= lambda: self._get_transitions(transition_entries, transitions_block_frame))
-        submit_btn.pack()
+        submit_btn = tk.Button(master=state_transitions_frame, 
+                               text="Confirm", 
+                               command= lambda: self._get_transitions(transition_entries, transitions_block_frame),
+                               font=DEFAULT_BTN)
+        submit_btn.pack(pady=10)
     
     def _get_transitions(self, transition_entries, transitions_block_frame):
         get = np.vectorize(lambda entry: entry.get())
@@ -137,14 +152,16 @@ class MDPConstructionGUI:
         transitions_block_frame.pack_forget()
     
     def _draw_rewards_selection(self):
-        rewards_frame = tk.Frame(master=self._main_frame)
+        rewards_frame = tk.Frame(master=self._main_frame, pady=10)
         rewards_frame.pack()
-        rewards_lbl = tk.Label(master=rewards_frame, text="Possible reward values, comma-separated:")
-        rewards_lbl.grid(row=0, column=0)
+        rewards_lbl = tk.Label(master=rewards_frame, text="Possible reward values, comma-separated:", font=TIMES12BOLD)
+        rewards_lbl.grid(row=0, column=0, padx=5)
         rewards_entry = tk.Entry(master=rewards_frame)
-        rewards_entry.grid(row=0, column=1)
-        rewards_button = tk.Button(master=rewards_frame, text="Set rewards", command= lambda: self._get_rewards(rewards_entry, rewards_frame))
-        rewards_button.grid(row=0, column=2)
+        rewards_entry.grid(row=0, column=1, padx=5)
+        rewards_button = tk.Button(master=rewards_frame, text="Confirm", 
+                                   command= lambda: self._get_rewards(rewards_entry, rewards_frame),
+                                   font=DEFAULT_BTN)
+        rewards_button.grid(row=0, column=2, padx=5)
     
     def _get_rewards(self, rewards_entry, rewards_frame):
         rewards = [float(reward) for reward in rewards_entry.get().split(',')]
@@ -155,12 +172,14 @@ class MDPConstructionGUI:
         rewards_frame.pack_forget()
     
     def _draw_reward_sas_triples_selection(self):
-        triples_block_frame = tk.Frame(master=self._main_frame)
+        triples_block_frame = tk.Frame(master=self._main_frame, pady=10)
         triples_block_frame.pack()
-        triples_lbl = tk.Label(triples_block_frame, text="We now require the reward - next state - action - current state probability distribution, p(R_{t+1} = r | S_{t+1} = s, A_t = a, S_t = s):")
+        triples_lbl = tk.Label(triples_block_frame, 
+                               text="The P(r | s', a, s) function:",
+                               font=TIMES16BOLD,
+                               pady=20)
         triples_lbl.pack()
-
-        triples_frame = tk.Frame(master=triples_block_frame, borderwidth=3)
+        triples_frame = tk.Frame(master=triples_block_frame)
         triples_frame.pack()
         S = self.inputs["S"]
         A = self.inputs["A"]
@@ -169,26 +188,26 @@ class MDPConstructionGUI:
         reward_entries = np.zeros(shape=(S, A, S, R), dtype=object)
 
         for s in range(S):
-            state_frame = tk.Frame(master=triples_frame, borderwidth=2)
+            state_frame = tk.Frame(master=triples_frame, pady=10, bd=3, relief=tk.GROOVE)
             state_frame.pack()
             
-            current_state_label = tk.Label(master=state_frame, text="Current State = " + str(s)  + ":")
-            current_state_label.grid(row=s, column=0)
+            current_state_label = tk.Label(master=state_frame, text="s = " + str(s) + ":", font=TIMES14BOLD)
+            current_state_label.grid(row=s, column=0, padx=5)
             
             matrix_list_frame = tk.Frame(master=state_frame)
             matrix_list_frame.grid(row=s, column=1)
 
             for a in range(A):
                 matrix_area_frame = tk.Frame(master=matrix_list_frame)
-                matrix_area_frame.grid(row=0, column=a)
+                matrix_area_frame.grid(row=0, column=a, padx=10)
                 
-                reward_label = tk.Label(master=matrix_area_frame, text="Reward")
+                reward_label = tk.Label(master=matrix_area_frame, text="r", font=TIMES12BOLD)
                 reward_label.grid(row=0, column=1)
 
-                state_label = tk.Label(master=matrix_area_frame, text="Next State")
-                state_label.grid(row=1, column=0)
+                state_label = tk.Label(master=matrix_area_frame, text="s'", font=TIMES12BOLD)
+                state_label.grid(row=1, column=0, padx=5)
 
-                action_label = tk.Label(master=matrix_area_frame, text="Action = " + str(a))
+                action_label = tk.Label(master=matrix_area_frame, text="a = " + str(a), font=TIMES14BOLD)
                 action_label.grid(row=2, column=1)
 
                 actual_matrix = tk.Frame(master=matrix_area_frame)
@@ -208,12 +227,14 @@ class MDPConstructionGUI:
                             elem_frame = tk.Frame(master=actual_matrix, relief=tk.RAISED, borderwidth=1)
                             elem_frame.grid(row=i, column=j)
                             default_value = tk.StringVar(elem_frame, value='0')
-                            entry = tk.Entry(elem_frame, textvariable=default_value)
+                            entry = tk.Entry(elem_frame, textvariable=default_value, width=4)
                             reward_entries[s,a, i-1,j-1] = entry
                             entry.pack()
         
-        submit_btn = tk.Button(master=triples_frame, text="Set Reward SAS Probabilities", command= lambda: self._get_reward_sas_triples(reward_entries, triples_block_frame))
-        submit_btn.pack()
+        submit_btn = tk.Button(master=triples_frame, 
+                               text="Confirm", 
+                               command= lambda: self._get_reward_sas_triples(reward_entries, triples_block_frame))
+        submit_btn.pack(pady=10)
     
     def _get_reward_sas_triples(self, reward_entries, triples_block_frame):
         get = np.vectorize(lambda entry: entry.get())
@@ -225,3 +246,5 @@ class MDPConstructionGUI:
     
     def _close(self):
         self._window.destroy()
+
+MDPConstructionGUI()
