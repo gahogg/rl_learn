@@ -1,5 +1,4 @@
 import tkinter as tk
-from statistics import median
 from tkinter import ttk
 import numpy as np
 
