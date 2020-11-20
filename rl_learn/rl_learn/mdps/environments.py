@@ -1,6 +1,6 @@
 import numpy as np
 from rl_learn.mdps.guis import MDPConstructionGUI
-
+import os
 
 class MDP:
     
@@ -72,6 +72,16 @@ class MDP:
 
         return self._rewards[r_index], s
     
+    def save(self, path):
+        """
+        Stores the MDP in a text file at path. Creates folder "MDPs" if it doesn't exist.
+        """
+        root = os.path.join("MDPs")
+        if not os.path.exists(root):
+            os.makedirs(root)
+
+        return root
+
     @staticmethod
     def MDP_from_transitions_and_reward_sas_triples(state_transitions, reward_sas_triples, rewards, name="MDP"):
         """
