@@ -1,6 +1,8 @@
 import numpy as np
 from rl_learn.mdps.guis import MDPConstructionGUI
 import os
+import json
+
 
 class MDP:
     
@@ -72,15 +74,36 @@ class MDP:
 
         return self._rewards[r_index], s
     
-    def save(self, path):
+    def save(self, path, name="mdp.json"):
         """
-        Stores the MDP in a text file at path. Creates folder "MDPs" if it doesn't exist.
+        Stores the MDP in a json file at path. name must end in ".json".
         """
-        root = os.path.join("MDPs")
-        if not os.path.exists(root):
-            os.makedirs(root)
+        path = os.path.join(path, name)
 
-        return root
+        json_data = {"dynamics" : self._dynamics.tolist(),
+                      "rewards" : self._rewards.tolist(),
+                      "name"    : self._name     }
+
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(json_data, f, indent=4)
+
+        return path
+    
+    @staticmethod
+    def load(path):
+        """
+        Returns an MDP constructed from the json file referenced at path.
+        """
+        json_data = {}
+        with open(path) as infile:
+            json_data = json.load(infile)
+        
+        dynamics = json_data["dynamics"]
+        rewards = json_data["rewards"]
+        name = json_data["name"]
+
+        return MDP(dynamics, rewards, name)
+
 
     @staticmethod
     def MDP_from_transitions_and_reward_sas_triples(state_transitions, reward_sas_triples, rewards, name="MDP"):
