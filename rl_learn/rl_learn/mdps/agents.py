@@ -86,6 +86,7 @@ class PolicyIterationAgent(ModelAgent):
 	get_alike_agent()
 	  Returns a ModelAgent initialized with the same parameters.
 	"""
+
 	def __init__(self, mdp, tolerance=.1, gamma=.95):
 		"""
 		Returns a new PolicyIterationAgent.
@@ -151,7 +152,7 @@ class PolicyIterationAgent(ModelAgent):
 
 		return cls(self._mdp, self._tolerance, self._gamma)
 	
-	
+
 	def _value_evaluation(self):
 		"""
 		Evaluates the agent's current policy until its given tolerance is satisfied.
@@ -168,12 +169,12 @@ class PolicyIterationAgent(ModelAgent):
 		for s in range(S):
 			for a in range(A):
 				for s_prime in range(S):
-					for r in range(possible_rewards):
+					for r in range(R):
 						joint_prob = dynamics[s][a][s_prime][r]
-						target = possible_rewards[r] + gamma * self._q[self._pi[s_prime]]
-						new_qs[s, a] += joint_prob*target
+						target = possible_rewards[r] + (gamma * self._q[s_prime, self._pi[s_prime]])
+						new_qs[s, a] = new_qs[s, a] + joint_prob*target
 		
-		biggest_change = max(abs(new_qs - self._q))
+		biggest_change = np.max(np.abs(new_qs - self._q))
 		self._q = new_qs
 
 		if biggest_change > tol:
@@ -192,6 +193,10 @@ class PolicyIterationAgent(ModelAgent):
 		for s in range(S):
 			self._pi[s] = np.argmax(self._q[s])
 		
-		return policy == self._pi
+		for s in range(S):
+			if self._pi[s] != policy[s]:
+				return False
+		
+		return True
 
 		
