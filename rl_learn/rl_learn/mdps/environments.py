@@ -25,13 +25,13 @@ class MDP:
         name : Str
             Can optionally give the MDP a name.
 		"""
-        self._dynamics = np.array(dynamics)
-        self._rewards = np.array(rewards)
-        self._name = name
+        self.dynamics = np.array(dynamics)
+        self.rewards = np.array(rewards)
+        self.name = name
 
-        self._S = len(dynamics)
-        self._A = len(dynamics[0])
-        self._R = len(dynamics[0][0][0])
+        self.S = len(dynamics)
+        self.A = len(dynamics[0])
+        self.R = len(dynamics[0][0][0])
     
     def interact(self, s, a):
         """
@@ -57,9 +57,9 @@ class MDP:
 		  [1] : Int in {0, ..., S-1}
 		    The next state
         """
-        joint_probability_matrix = self._dynamics[s][a]
-        R = self._R
-        S = self._S
+        joint_probability_matrix = self.dynamics[s][a]
+        R = self.R
+        S = self.S
 
         # Create a flat copy of the array
         flat = joint_probability_matrix.flatten()
@@ -72,7 +72,7 @@ class MDP:
         adjusted_index = np.unravel_index(sample_index, (S, R))
         s, r_index = adjusted_index
 
-        return self._rewards[r_index], s
+        return self.rewards[r_index], s
     
     def save(self, path, name="mdp.json"):
         """
@@ -80,9 +80,9 @@ class MDP:
         """
         path = os.path.join(path, name)
 
-        json_data = {"dynamics" : self._dynamics.tolist(),
-                      "rewards" : self._rewards.tolist(),
-                      "name"    : self._name     }
+        json_data = {"dynamics" : self.dynamics.tolist(),
+                      "rewards" : self.rewards.tolist(),
+                      "name"    : self.name     }
 
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(json_data, f, indent=4)

@@ -247,4 +247,3 @@ class MDPConstructionGUI:
     def _close(self):
         self._window.destroy()
 
-MDPConstructionGUI()
