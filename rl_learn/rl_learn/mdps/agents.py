@@ -13,7 +13,7 @@ class ModelAgent:
 	ModelAgent(mdp)
 	  Returns a ModelAgent.
 
-	get_action()
+	get_action(s)
 	  Returns the choice of action.
 
 	train()
@@ -38,9 +38,9 @@ class ModelAgent:
 		"""
 		pass
 
-	def get_action(self):
+	def get_action(self, s):
 		"""
-		Returns a choice of action.
+		Returns a choice of action in state s.
 
 		Returns
 		-------
@@ -76,7 +76,7 @@ class PolicyIterationAgent(ModelAgent):
 	PolicyIterationAgent(mdp)
 	  Returns a PolicyIterationAgent.
 
-	get_action()
+	get_action(s)
 	  Returns the choice of action.
 
 	train()
@@ -117,10 +117,15 @@ class PolicyIterationAgent(ModelAgent):
 		"""
 		Returns a choice of action in state s.
 
+		Parameters
+		----------
+		s : Int in {0, ..., S-1}
+		  The state the agent is currently in
+
 		Returns
 		-------
 		Int
-		  An int in {0, ..., A-1}
+		  An action in {0, ..., A-1}
 		"""
 		return self._pi[s]
 
