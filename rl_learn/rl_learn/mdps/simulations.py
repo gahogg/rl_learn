@@ -17,7 +17,6 @@ class AgentVisual:
         self.radius = radius # > 1
         self.speed = speed # (speed_x, speed_y)
         self.states = states # {state_name : state}
-        print(self.states)
     
     def draw(self, surface):
         col = self.color
@@ -43,10 +42,7 @@ class AgentVisual:
         return already_there
 
     def move_towards(self, center, speed=None):
-        print(center)
-        print(self.center)
         diff = Vector2((center[0]-self.center[0], center[1]-self.center[1]))
-        print(diff)
         if abs(diff.x) < 1 and abs(diff.y) < 1:
             return True
 
@@ -91,23 +87,41 @@ def show_simulation(mdp, agent, window_width=600, window_height=600, speed=.1):
     possible_rewards = mdp.rewards
 
     state_pairs = [StatePair(i, StateVisual(name="State " + str(i), center=(random.choice(window_width), random.choice(window_height)))) for i in range(S)]
-    agent_pair = AgentPair(agent, AgentVisual(states=StatePair.construct_state_dict(state_pairs), speed=(speed, speed)))
+    agent_pair = AgentPair(agent, AgentVisual(states=StatePair.construct_state_dict(state_pairs), speed=(speed, speed), center=state_pairs[0].state_visual.center))
 
     screen = pygame.display.set_mode((window_width, window_height))
 
     s = 0
+    i = 1
+    heading_to_state = True
+    middle = (window_width//2, window_height//2)
+
     while 1:
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
         
         screen.fill(BLACK)
 
-        print(state_pairs[s].state_visual.name)
-        already_there = agent_pair.agent_visual.move_towards_state(state_name=state_pairs[s].state_visual.name)
+        if heading_to_state:
+            already_there = agent_pair.agent_visual.move_towards_state(state_name=state_pairs[s].state_visual.name)
 
-        if already_there:
-            # Take an action in the current state
-            r, s = mdp.interact(s, agent.get_action(s))
+            if already_there:
+                # Take an action in the current state
+                action = agent.get_action(s)
+                prev_s = s
+                r, s = mdp.interact(s, agent.get_action(s))
+                print(str(i) + " In state " + str(prev_s) + " took action " + str(action) + ". Received reward " + str(r) + ", and heading to the middle now.")
+                i += 1
+                heading_to_state = False
+        else:
+            already_there = agent_pair.agent_visual.move_towards(center=middle)
+
+            if already_there:
+                heading_to_state = True
+                print("At the middle now and heading to state " + str(s) + ".")
+            
+
+        
         
         agent_pair.agent_visual.draw(screen)
 
