@@ -204,4 +204,76 @@ class PolicyIterationAgent(ModelAgent):
 		
 		return True
 
+class RandomAgent(ModelAgent):
+	"""
+	A ModelAgent that uses the Policy Iteration (with q-values) algorithm to learn its policy.
+
+	Methods
+	-------
+	PolicyIterationAgent(mdp)
+	  Returns a PolicyIterationAgent.
+
+	get_action(s)
+	  Returns the choice of action.
+
+	train()
+	  Performs the changes desired by the agent in an offline fashion, so the
+	  agent can "learn" the MDP it's up against.
+	
+	get_alike_agent()
+	  Returns a ModelAgent initialized with the same parameters.
+	"""
+
+	def __init__(self, mdp, tolerance=.1, gamma=.95):
+		"""
+		Returns a new PolicyIterationAgent.
+
+		Parameters
+		----------
+		mdp : MDP
+		  The mdp the agent will be interacting with
 		
+		tolerance : Float >= 0
+		  The tolerance for value evaluation changes
+
+		gamma : Float in (0, 1)
+		  The discount factor
+		"""
+		self._A = mdp.A
+
+	def get_action(self, s):
+		"""
+		Returns a random choice of action in state s.
+
+		Parameters
+		----------
+		s : Int in {0, ..., S-1}
+		  The state the agent is currently in
+
+		Returns
+		-------
+		Int
+		  An action in {0, ..., A-1}
+		"""
+		return np.random.choice(self._A)
+
+	def train(self):
+		"""
+		The random agent doesn't do much to train...
+		"""
+		pass
+
+
+	def get_alike_agent(self):
+		"""
+		Returns a ModelAgent initialized with the same parameters.
+
+		Returns
+		-------
+		ModelAgent
+		  A reinitialized ModelAgent
+		"""
+		cls = self.__class__
+
+		return cls(self._mdp)
+	
