@@ -3,8 +3,14 @@ from collections.abc import Iterable
 from pygame import draw
 from pygame.math import Vector2
 from numpy import random
+from pygame import font
 
 pygame.init()
+font.init()
+
+STATE_FONT = font.SysFont('Comic Sans MS', 30)
+ACTION_FONT = font.SysFont('Comic Sans MS', 20)
+REWARD_FONT = font.SysFont('Comic Sans MS', 20)
 
 BLACK = 0, 0, 0
 RED = 255, 0, 0
@@ -24,6 +30,14 @@ class AgentVisual:
         r = self.radius
         draw.circle(surface=surface, color=col, center=center, radius=r)
         return self
+    
+    def draw_action_text(self, surface, action):
+        label = ACTION_FONT.render("Took action " + str(action), False, (255, 0, 255))
+        surface.blit(label, (self.center[0], self.center[1]+self.radius*2))
+    
+    def draw_reward_text(self, surface, reward_val):
+        label = REWARD_FONT.render("Received reward " + str(reward_val), False, (255, 255, 0))
+        surface.blit(label, (self.center[0], self.center[1]+self.radius*2))
     
     def move(self, delta_xy=[1, 1], speed=None):
         if speed is None:
@@ -63,6 +77,8 @@ class StateVisual:
         center = self.center
         r = self.radius
         draw.circle(surface=surface, color=col, center=center, radius=r)
+        label = STATE_FONT.render(self.name, False, (0, 255, 255))
+        surface.blit(label, (self.center[0], self.center[1]+self.radius*2))
         return self
 
 class StatePair:
@@ -82,21 +98,19 @@ class AgentPair:
 def show_simulation(mdp, agent, window_width=600, window_height=600, speed=.1):
     pygame.init()
     S = mdp.S
-    A = mdp.A
-    R = mdp.R
-    possible_rewards = mdp.rewards
 
-    state_pairs = [StatePair(i, StateVisual(name="State " + str(i), center=(random.choice(window_width), random.choice(window_height)))) for i in range(S)]
+    state_pairs = [StatePair(i, StateVisual(name="State " + str(i), center=(random.choice([100, 300]), random.choice([100, 300])))) for i in range(S)]
     agent_pair = AgentPair(agent, AgentVisual(states=StatePair.construct_state_dict(state_pairs), speed=(speed, speed), center=state_pairs[0].state_visual.center))
-
     screen = pygame.display.set_mode((window_width, window_height))
 
     s = 0
-    i = 1
-    heading_to_state = True
+    action = agent.get_action(s)
+    r, s = mdp.interact(s, action)
+    #prev_r, prev_s = (r, s)
+    heading_to_state = False
     middle = (window_width//2, window_height//2)
 
-    while 1:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
         
@@ -106,24 +120,21 @@ def show_simulation(mdp, agent, window_width=600, window_height=600, speed=.1):
             already_there = agent_pair.agent_visual.move_towards_state(state_name=state_pairs[s].state_visual.name)
 
             if already_there:
-                # Take an action in the current state
                 action = agent.get_action(s)
-                prev_s = s
-                r, s = mdp.interact(s, agent.get_action(s))
-                print(str(i) + " In state " + str(prev_s) + " took action " + str(action) + ". Received reward " + str(r) + ", and heading to the middle now.")
-                i += 1
+                r, s = mdp.interact(s, action)
                 heading_to_state = False
         else:
             already_there = agent_pair.agent_visual.move_towards(center=middle)
 
             if already_there:
                 heading_to_state = True
-                print("At the middle now and heading to state " + str(s) + ".")
             
-
-        
-        
         agent_pair.agent_visual.draw(screen)
+
+        if heading_to_state:
+            agent_pair.agent_visual.draw_reward_text(screen, r)
+        else:
+            agent_pair.agent_visual.draw_action_text(screen, action)
 
         for state_pair in state_pairs:
             state_pair.state_visual.draw(screen)
