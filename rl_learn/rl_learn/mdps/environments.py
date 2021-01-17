@@ -39,6 +39,8 @@ class MDP:
         given that the current state is S_t = s and action taken is A_t = a. It is a realized value
         from the joint reward-state probability distribution defined by this MDP's dynamics.
 
+        A returned reward of -10,000 indicates the agent tried to interact in a terminal state.
+
         Parameters
 		----------
         s : Int in {0, ..., S-1}

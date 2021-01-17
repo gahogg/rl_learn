@@ -206,27 +206,26 @@ class PolicyIterationAgent(ModelAgent):
 
 class RandomAgent(ModelAgent):
 	"""
-	A ModelAgent that uses the Policy Iteration (with q-values) algorithm to learn its policy.
+	A ModelAgent that acts randomly.
 
 	Methods
 	-------
-	PolicyIterationAgent(mdp)
-	  Returns a PolicyIterationAgent.
+	RandomAgent(mdp)
+	  Returns a RandomAgent.
 
 	get_action(s)
-	  Returns the choice of action.
+	  Returns the choice of action, which is random.
 
 	train()
-	  Performs the changes desired by the agent in an offline fashion, so the
-	  agent can "learn" the MDP it's up against.
+	  For the random agent, does nothing
 	
 	get_alike_agent()
-	  Returns a ModelAgent initialized with the same parameters.
+	  Returns a RandomAgent initialized with the same parameters.
 	"""
 
 	def __init__(self, mdp, tolerance=.1, gamma=.95):
 		"""
-		Returns a new PolicyIterationAgent.
+		Returns a new RandomAgent.
 
 		Parameters
 		----------
@@ -266,14 +265,131 @@ class RandomAgent(ModelAgent):
 
 	def get_alike_agent(self):
 		"""
-		Returns a ModelAgent initialized with the same parameters.
+		Returns a RandomAgent initialized with the same parameters.
 
 		Returns
 		-------
-		ModelAgent
-		  A reinitialized ModelAgent
+		RandomAgent
+		  A reinitialized RandomAgent
 		"""
 		cls = self.__class__
 
 		return cls(self._mdp)
+
+
+class ModelFreeAgent:
+	"""
+	An abstract class used to represent an agent that has no model of its environment.
+	Although it takes as input an MDP, it samples from it instead of peeking at the dynamics, and records the
+	the size of the action and state spaces. They also don't attempt to learn a model of the environment,
+	and therefore do not incorporate planning. Their goal is to learn action values. 
+	ModelFreeAgents interact with environments of class MDP. The action space A is represented as {0, ..., A-1}, 
+	and the state space {0, ..., S-1}.
+
+	Methods
+	-------
+	ModelFreeAgent(mdp, num_games=1000)
+	  Returns a ModelFreeAgent.
+
+	get_action(s)
+	  Returns the choice of action.
+
+	train()
+	  Plays many games in the environment to learn action values.
 	
+	get_alike_agent()
+	  Returns a ModelFreeAgent initialized with the same parameters.
+	"""
+	pass
+
+class OnPolicyMCAgent(ModelFreeAgent):
+	'''
+	A OnPolicyMCAgent that uses the Monte Carlo method to estimate its action values, acting on policy.
+
+	Methods
+	-------
+	OnPolicyMCAgent(mdp, num_games=1000, epsilon=.01)
+	  Returns a OnPolicyMCAgent.
+
+	get_action(s)
+	  Returns the choice of action.
+
+	train()
+	  Plays many games in the environment to learn action values using Monte Carlo estimation.
+	
+	get_alike_agent()
+	  Returns a ModelFreeAgent initialized with the same parameters.
+	'''
+
+	def __init__(self, mdp, num_games=1000):
+		self._S = mdp.S
+		self._A = mdp.A
+		self._action_values = np.zeros(shape=(self._S, self._A))
+		self._visited_num = np.zeros(shape=(self._S, self._A), dtype=np.int)
+		self._mdp = mdp
+		self._num_games = num_games
+		self._pi = np.zeros(self._S)
+	
+	def get_action(self, s):
+		return np.argmax(self._pi)
+
+	def train(self):
+		'''
+		Plays many games in the environment to learn action values using Monte Carlo estimation.
+		'''
+		for _ in self._num_games:
+			s_a_returns = np.zeros(shape=(self._S, self._A))
+			visited = np.zeros(shape=(self._S, self._A), dtype=np.bool)
+
+			for s, a, s_prime, r in self._generate_episode():
+				visited[s, a] = True
+				s_a_returns[visited] += r
+			
+			self._action_values = self._action_values + (1/self._visited_num)*(r - self._action_values)
+			self._policy_improvement()
+
+
+	def _generate_episode(self):
+		'''
+		Plays a single game with the MDP, follwing its current policy.
+		Uses exploring (random) starts.
+
+		Returns List[(State, Action, State, Reward)]
+		'''
+		s = np.random.choice(self._S)
+		episode = []
+
+		while True:
+			a = self.get_action(s)
+			s = self._S
+			r, s_prime = self._mdp.interact(s, a)
+
+			# Acted in terminal state
+			if r == -10000:
+				break
+			else:
+				episode.append((s, a, s_prime, r))
+				s = s_prime
+
+		return episode
+	
+	def _policy_improvement(self):
+		"""
+		Makes the policy greedy with respect to its q-value function.
+		Returns True iff no changes were made, else False
+		"""
+		policy = deepcopy(self._pi)
+		S = self._S
+
+		for s in range(S):
+			self._pi[s] = np.argmax(self._action_values[s])
+		
+		for s in range(S):
+			if self._pi[s] != policy[s]:
+				return False
+		
+		return True
+
+
+
+
